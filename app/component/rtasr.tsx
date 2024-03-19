@@ -7,9 +7,10 @@ import { WebSocketHelper } from "../lib/rtasr"
 export default function Rtasr() {
     const [websocket, setWebsocket] = useState<WebSocketHelper>()
     const [connected, setConnected] = useState<boolean>(false)
+    const [showText, setShowText] = useState<string>('')
 
     useEffect(() => {
-        const websocket = WebSocketHelper.getInstance(setConnected);
+        const websocket = WebSocketHelper.getInstance(setShowText, setConnected);
         setWebsocket(websocket)
     }, [])
 
@@ -30,6 +31,7 @@ export default function Rtasr() {
                 onClick={onClick}>
                 {connected ? "DISCONNECT" : "CONNECT"}
             </Button>
+            <div>{showText}</div>
         </>
     )
 
