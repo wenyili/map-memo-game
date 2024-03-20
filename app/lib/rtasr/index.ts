@@ -41,7 +41,6 @@ export class WebSocketHelper {
             console.log("握手成功");
         } else if (jsonData.action == "result") {
             const data = JSON.parse(jsonData.data)
-            console.log(data)
             // 转写结果
             let resultTextTemp = ""
             data.cn.st.rt.forEach((j:any) => {
@@ -53,6 +52,7 @@ export class WebSocketHelper {
             });
             if (data.cn.st.type == 0) {
                 // 【最终】识别结果：
+                console.log(resultTextTemp)
                 this.resultText += resultTextTemp;
                 resultTextTemp = ""
             }
