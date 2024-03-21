@@ -5,8 +5,8 @@ import { useRecorder } from "../lib/rtasr/useRecorder"
 import { useCountries } from "../lib/useCountries";
 
 export default function Game() {
-    const { country, onGuess, right } = useCountries()
-    const { recording, startRecoding, stopRecording, showText, lastText } = useRecorder(onGuess);
+    const { country, onGuess, right, lastText } = useCountries()
+    const { recording, startRecoding, stopRecording, showText } = useRecorder(onGuess);
 
     const onClick = () => {
         if (recording === "RECORDING") {
@@ -28,17 +28,21 @@ export default function Game() {
     return (
         <>
             <Button 
-                className="mt-4 rounded-md bg-blue-400 px-4 py-2 text-sm text-white transition-colors hover:bg-blue-300"
+                className="fixed top-0 w-full bg-blue-400 text-white transition-colors hover:bg-blue-300"
                 disabled={recording !== "RECORDING" && recording !== "CLOSED"}
                 onClick={onClick}>
                 {getBtnStatus(recording)}
             </Button>
-            <div className="p-10">
-                <span className="p-10">{country}</span>
-                {right && (<span>✅</span>)}
+            <div className="p-20">
+                <div>问题：{country}</div>
+                <div>
+                    <span>回答：{lastText}</span>
+                    {right && <span>✅</span>}
+                </div>
             </div>
-            <div>{lastText}</div>
-            <div>{showText}</div>
+            <div className="fixed bottom-0 w-full bg-gray-400 text-white p-4">
+                {showText}
+            </div>
         </>
     )
 

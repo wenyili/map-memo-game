@@ -13,11 +13,20 @@ const getWebSocketUrl = async () => {
     return data.result;
 }
 
+function toBase64(buffer: ArrayBuffer) {
+    var binary = "";
+    var bytes = new Uint8Array(buffer);
+    var len = bytes.byteLength;
+    for (var i = 0; i < len; i++) {
+      binary += String.fromCharCode(bytes[i]);
+    }
+    return window.btoa(binary);
+}
+
 export function useRecorder(onGuess: (guess: string) => void) {
     const [recording, setRecording] = useState<"CONNECTING" | "STARTING" | "RECORDING" | "CLOSING" | "CLOSED">("CLOSED")
     const [showText, setShowText] = useState<string>('')
-    const [lastText, setLastText] = useState<string>('')
-    const asrWS = useRef<WebSocket | undefined>()
+    const ws = useRef<WebSocket | undefined>()
     const resultText = useRef<string>('')
     const recorder = useRef<RecorderManager | undefined>()
 
@@ -30,46 +39,51 @@ export function useRecorder(onGuess: (guess: string) => void) {
         console.debug("...stop recording")
     }
     recorder.current.onFrameRecorded = ({ isLastFrame, frameBuffer }) => {
-        sendData(isLastFrame, frameBuffer)
+        sendData(isLastFrame, frameBuffer);
     };
 
     const sendData = (isLastFrame: boolean, frameBuffer: ArrayBuffer) => {
-        if (asrWS.current === undefined) return;
-        if (asrWS.current.readyState === asrWS.current.OPEN) {
-            asrWS.current.send(new Int8Array(frameBuffer));
+        if (ws.current === undefined) return;
+        const _ws = ws.current
+        if (_ws.readyState === _ws.OPEN) {
+            _ws.send(
+              JSON.stringify({
+                data: {
+                  status: isLastFrame ? 2 : 1,
+                  format: "audio/L16;rate=16000",
+                  encoding: "raw",
+                  audio: toBase64(frameBuffer),
+                },
+              })
+            );
             if (isLastFrame) {
-                console.debug("...last frame")
-                asrWS.current.send('{"end": true}');
-                setRecording("CLOSING")
+              setRecording("CLOSING")
             }
         }
     }
 
     const renderResult = (resultData: string) => {
-        const jsonData = JSON.parse(resultData);
-        if (jsonData.action == "started") {
-            console.debug("握手成功");
-        } else if (jsonData.action == "result") {
-            const data = JSON.parse(jsonData.data)
-            let resultTextTemp = ""
-            data.cn.st.rt.forEach((j:any) => {
-                j.ws.forEach((k:any) => {
-                    k.cw.forEach((l:any) => {
-                        resultTextTemp += l.w;
-                    });
-                });
-            });
-            
-            setShowText(resultText.current + resultTextTemp);
-            if (data.cn.st.type == 0) {
-                // 【最终】识别结果：
-                // console.debug(resultTextTemp)
-                onGuess(resultTextTemp)
-                setLastText(resultTextTemp)
-                resultText.current += resultTextTemp;
+        // 识别结束
+        let jsonData = JSON.parse(resultData);
+        if (jsonData.data && jsonData.data.result) {
+            let data = jsonData.data.result;
+            let str = "";
+            let ws = data.ws;
+            for (let i = 0; i < ws.length; i++) {
+                str = str + ws[i].cw[0].w;
             }
-        } else if (jsonData.action == "error") {
-            console.debug("出错了:", jsonData);
+            onGuess(str)
+            resultText.current += str;
+            setShowText(resultText.current);
+        }
+        if (jsonData.code === 0 && jsonData.data.status === 2) {
+            console.debug("end...ws close")
+            ws.current?.close();
+        }
+        if (jsonData.code !== 0) {
+            ws.current?.close();
+            alert(jsonData)
+            console.error(jsonData);
         }
     }
 
@@ -80,33 +94,51 @@ export function useRecorder(onGuess: (guess: string) => void) {
         const websocketUrl = await getWebSocketUrl()
         if (!websocketUrl) return
 
-        let ws;
+        let _ws: WebSocket;
         if ("WebSocket" in window) {
-            ws = new WebSocket(websocketUrl);
-            asrWS.current = ws;
+            _ws = new WebSocket(websocketUrl);
+            ws.current = _ws;
         } else {
             alert("浏览器不支持WebSocket");
             return; 
         }
         setRecording("CONNECTING")
 
-        ws.onopen = (e: Event) => {
+        _ws.onopen = (e: Event) => {
             console.debug("websocket open")
             setRecording("STARTING")
             recorder.current?.start({
                 sampleRate: 16000,
                 frameSize: 1280,
             });
+            const params = {
+                common: {
+                  app_id: "338be912",
+                },
+                business: {
+                  language: "zh_cn",
+                  domain: "iat",
+                  accent: "mandarin",
+                  vad_eos: 5000,
+                  dwa: "wpgs",
+                },
+                data: {
+                  status: 0,
+                  format: "audio/L16;rate=16000",
+                  encoding: "raw",
+                },
+              };
+              _ws.send(JSON.stringify(params));
         };
-        ws.onmessage = (e: MessageEvent) => {
+        _ws.onmessage = (e: MessageEvent) => {
             renderResult(e.data);
         };
-        ws.onerror = (e: Event) => {
+        _ws.onerror = (e: Event) => {
             console.debug("websocket error")
             setRecording("CLOSED")
             recorder.current?.stop();
         };
-        ws.onclose = (e: CloseEvent) => {
+        _ws.onclose = (e: CloseEvent) => {
             console.debug("websocket close")
             setRecording("CLOSED")
             recorder.current?.stop();
@@ -114,8 +146,8 @@ export function useRecorder(onGuess: (guess: string) => void) {
     }
 
     const stopRecording = () => {
-        asrWS.current?.close();
+        ws.current?.close();
     }
 
-    return {recording, startRecoding, stopRecording, showText, lastText}
+    return {recording, startRecoding, stopRecording, showText}
 }

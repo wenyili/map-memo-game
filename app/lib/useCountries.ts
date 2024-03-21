@@ -5,9 +5,11 @@ export function useCountries() {
     const index = useRef<number>(0);
     const [country, setCountry] = useState<string>(countries[index.current]);
     const [right, setRight] = useState<boolean>(false);
+    const [lastText, setLastText] = useState<string>("");
     
     const onGuess = (guess: string) => {
         const country = countries[index.current];
+        setLastText(guess)
         console.log(`guess: ${guess} ${country}`)
         if (guess.includes(country)) {
             setRight(true)
@@ -15,8 +17,9 @@ export function useCountries() {
                 index.current = (index.current + 1) % countries.length;
                 setCountry(countries[index.current])
                 setRight(false)
-            }, 300);
+                setLastText("")
+            }, 500);
         }
     }
-    return {country, onGuess, right}
-} 
+    return {country, onGuess, right, lastText}
+}
