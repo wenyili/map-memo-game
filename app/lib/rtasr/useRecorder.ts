@@ -72,9 +72,9 @@ export function useRecorder(onGuess: (guess: string) => void) {
             for (let i = 0; i < ws.length; i++) {
                 str = str + ws[i].cw[0].w;
             }
-            onGuess(str)
             resultText.current += str;
             setShowText(resultText.current);
+            onGuess(str)
         }
         if (jsonData.code === 0 && jsonData.data.status === 2) {
             console.debug("end...ws close")

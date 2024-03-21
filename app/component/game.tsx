@@ -28,7 +28,7 @@ export default function Game() {
     return (
         <>
             <Button 
-                className="fixed top-0 w-full bg-blue-400 text-white transition-colors hover:bg-blue-300"
+                className="fixed top-0 w-full bg-gray-400 text-white transition-colors hover:bg-gray-300 rounded-none"
                 disabled={recording !== "RECORDING" && recording !== "CLOSED"}
                 onClick={onClick}>
                 {getBtnStatus(recording)}
