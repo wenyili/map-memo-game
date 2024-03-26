@@ -13,6 +13,6 @@ export async function POST(req: Request) {
     const signatureSha = CryptoJS.HmacSHA1(signa, secretKey);
     let signature = CryptoJS.enc.Base64.stringify(signatureSha);
     signature = encodeURIComponent(signature);
-    const result =  `${url}?appid=${appId}&ts=${ts}&signa=${signature}`;
+    const result =  `${url}?appid=${appId}&ts=${ts}&signa=${signature}&punc=0&engLangType=4`;
     return NextResponse.json({result}, {status:200});
 }

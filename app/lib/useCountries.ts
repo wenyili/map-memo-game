@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import countries from "../lib/countries.json"
+import countries from "../assets/country_data.json"
 
 async function judge(question: string, answer:string) {
     try {
@@ -21,24 +21,27 @@ async function judge(question: string, answer:string) {
 
 export function useCountries() {
     const index = useRef<number>(0);
-    const [country, setCountry] = useState<string>(countries[index.current]);
+    const [country, setCountry] = useState<string>(countries[index.current]["name_zh"]);
+    const [map, setMap] = useState<string>(countries[index.current]["outline_picture"]);
     const [right, setRight] = useState<boolean>(false);
     const [lastText, setLastText] = useState<string>("");
     
     const onGuess = async (guess: string) => {
-        const country = countries[index.current];
+        const country = countries[index.current]["name_zh"];
         setLastText(guess)
         const isTrue = await judge(country, guess)
         console.log(`guess: ${guess} ${country} ${isTrue}`)
         if (isTrue) {
             setRight(true)
+            // setMap(countries[index.current]["outline_color_picture"])
             setTimeout(() => {
                 index.current = (index.current + 1) % countries.length;
-                setCountry(countries[index.current])
+                setCountry(countries[index.current]["name_zh"])
+                setMap(countries[index.current]["outline_picture"])
                 setRight(false)
                 setLastText("")
             }, 300);
         }
     }
-    return {country, onGuess, right, lastText}
+    return {country, map, onGuess, right, lastText}
 }

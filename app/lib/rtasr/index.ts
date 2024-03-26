@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction } from 'react';
-import RecorderManager from './recorder';
+import RecorderManager from './recorder_manager';
 
 export class WebSocketHelper {
     private static instance: WebSocketHelper;
