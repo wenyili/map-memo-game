@@ -1,8 +1,8 @@
 import { useRef, useState } from "react";
 import RecorderManager from './recorder_manager';
 
-const getWebSocketUrl = async (type="iat") => {
-    const response = await fetch(`/api/xfyun/${type}`, {
+const getWebSocketUrl = async (recorderType="iat") => {
+    const response = await fetch(`/api/xfyun/${recorderType}`, {
         method: "POST",
     });
     const data = await response.json();
@@ -23,12 +23,13 @@ function toBase64(buffer: ArrayBuffer) {
     return window.btoa(binary);
 }
 
-export function useRecorder(onGuess: (guess: string) => void, type="iat") {
+export function useRecorder(onGuess: (guess: string) => void) {
     const [recording, setRecording] = useState<"CONNECTING" | "STARTING" | "RECORDING" | "CLOSING" | "CLOSED">("CLOSED")
     const [showText, setShowText] = useState<string>('')
     const ws = useRef<WebSocket | undefined>()
     const resultText = useRef<string>('')
     const recorder = useRef<RecorderManager | undefined>()
+    const recorderType = useRef<string>("rtasr")
 
     recorder.current = new RecorderManager('./recorder');
     recorder.current.onStart = () => {
@@ -39,14 +40,14 @@ export function useRecorder(onGuess: (guess: string) => void, type="iat") {
         console.debug("...stop recording")
     }
     recorder.current.onFrameRecorded = ({ isLastFrame, frameBuffer }) => {
-        sendData(isLastFrame, frameBuffer, type);
+        sendData(isLastFrame, frameBuffer);
     };
 
-    const sendData = (isLastFrame: boolean, frameBuffer: ArrayBuffer, type="iat") => {
+    const sendData = (isLastFrame: boolean, frameBuffer: ArrayBuffer) => {
         if (ws.current === undefined) return;
         const _ws = ws.current
         if (_ws.readyState === _ws.OPEN) {
-            if (type === "iat") {
+            if (recorderType.current === "iat") {
                 _ws.send(
                     JSON.stringify({
                         data: {
@@ -62,7 +63,7 @@ export function useRecorder(onGuess: (guess: string) => void, type="iat") {
             }
             if (isLastFrame) {
                 setRecording("CLOSING")
-                if (type === "rtasr") {
+                if (recorderType.current === "rtasr") {
                     _ws.send('{"end": true}');
                 }
             }
@@ -123,8 +124,10 @@ export function useRecorder(onGuess: (guess: string) => void, type="iat") {
     const startRecoding = async () => {
         resultText.current = ""
         setShowText("")
+        recorderType.current = localStorage.getItem("recorderType") || "rtasr"
+        console.debug("recorder type:", recorderType.current)
 
-        const websocketUrl = await getWebSocketUrl(type)
+        const websocketUrl = await getWebSocketUrl(recorderType.current)
         if (!websocketUrl) return
 
         let _ws: WebSocket;
@@ -144,7 +147,7 @@ export function useRecorder(onGuess: (guess: string) => void, type="iat") {
                 sampleRate: 16000,
                 frameSize: 1280,
             });
-            if (type === 'iat') {
+            if (recorderType.current === 'iat') {
                 const params = {
                     common: {
                         app_id: "338be912",
@@ -168,7 +171,7 @@ export function useRecorder(onGuess: (guess: string) => void, type="iat") {
             }
         };
         _ws.onmessage = (e: MessageEvent) => {
-            if (type === 'iat') {
+            if (recorderType.current === 'iat') {
                 renderIatResult(e.data);
             } else {
                 renderRlasrResult(e.data);

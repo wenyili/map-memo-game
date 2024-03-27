@@ -29,8 +29,14 @@ export function useCountries() {
     const onGuess = async (guess: string) => {
         const country = countries[index.current]["name_zh"];
         setLastText(guess)
-        const isTrue = await judge(country, guess)
-        console.log(`guess: ${guess} ${country} ${isTrue}`)
+        const useGPT = localStorage.getItem("useGPT")
+        let isTrue = false;
+        if (useGPT == "true") {
+            isTrue = await judge(country, guess) || false
+        } else {
+            isTrue = guess.includes(country)
+        }
+        console.log(`guess: ${guess} ${country} ${isTrue} ${useGPT}`)
         if (isTrue) {
             setRight(true)
             // setMap(countries[index.current]["outline_color_picture"])
