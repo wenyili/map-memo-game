@@ -1,7 +1,7 @@
 'use client'
 
 import { Button } from "../ui/button"
-import { useRecorder } from "../lib/rtasr/useRecorder"
+import { useRecorder } from "../lib/useRecorder"
 import { useCountries } from "../lib/useCountries";
 import { Menu } from "./menu";
 import { useState } from "react";

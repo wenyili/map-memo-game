@@ -25,7 +25,6 @@ function getExt(mimeType: string) {
 }
 
 export async function POST(req: Request) {
-    console.log("send...")
     const buffer = await req.blob()
     try {
         const file = await toFile(buffer, `speech.wav`, {type: "video/wav"})

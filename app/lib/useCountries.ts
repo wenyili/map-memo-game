@@ -36,7 +36,7 @@ export function useCountries() {
         } else {
             isTrue = guess.includes(country)
         }
-        console.log(`guess: ${guess} ${country} ${isTrue} ${useGPT}`)
+        console.debug(`guess: ${guess} ${country} ${isTrue} ${useGPT}`)
         if (isTrue) {
             setRight(true)
             // setMap(countries[index.current]["outline_color_picture"])
