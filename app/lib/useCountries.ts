@@ -39,11 +39,14 @@ export function useCountries() {
         console.debug(`guess: ${guess} ${country} ${isTrue} ${useGPT}`)
         if (isTrue) {
             setRight(true)
-            // setMap(countries[index.current]["outline_color_picture"])
+            index.current = (index.current + 1) % countries.length;
+            const nextCountry = countries[index.current]["name_zh"]
+            const nextMap = countries[index.current]["outline_picture"]
+            const nextIamge = new Image()
+            nextIamge.src = nextMap
             setTimeout(() => {
-                index.current = (index.current + 1) % countries.length;
-                setCountry(countries[index.current]["name_zh"])
-                setMap(countries[index.current]["outline_picture"])
+                setCountry(nextCountry)
+                setMap(nextMap)
                 setRight(false)
                 setLastText("")
             }, 300);

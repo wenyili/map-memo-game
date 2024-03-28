@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import RecorderManager from './recorder_manager';
 
 const getWebSocketUrl = async (recorderType="iat") => {
