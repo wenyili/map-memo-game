@@ -5,14 +5,16 @@ import { useRecorder } from "../lib/useRecorder"
 import { useCountries } from "../lib/useCountries";
 import { Menu } from "./menu";
 import { useEffect, useState } from "react";
+import classNames from 'classnames';
 
-const debug = false;
+const debug = true;
 
 export default function Game() {
     const { country, map, onGuess, right, lastText } = useCountries()
     const { recording, startRecoding, stopRecording, showText } = useRecorder(onGuess);
     const [ showMenu, setShowMenu ] = useState<boolean>(false)
     const [ buttonText, setButtonText ] = useState<string>("Start Recording")
+    const [ hint, setHint ] = useState<string>("Hint")
 
     const onClick = () => {
         if (recording === "RECORDING") {
@@ -20,13 +22,6 @@ export default function Game() {
         } else if (recording === "CLOSED") {
             startRecoding()
         }
-    }
-
-    const getBtnStatus = (status: "CONNECTING" | "STARTING" | "RECORDING" | "CLOSING" | "CLOSED") => {
-        if (status === "CLOSED") {
-            return "Start Recording";
-        }
-        return status;
     }
 
     const getButtonText = () => {
@@ -51,7 +46,7 @@ export default function Game() {
             </div>
             <Menu isOpen={showMenu} onOpenChange={(isOpen:boolean) => {setShowMenu(isOpen)}}/>
             <Button 
-                className="fixed bottom-0 right-0 w-40 m-6 p-2 bg-gray-200 hover:bg-gray-500 text-gray-800 font-bold rounded inline-flex items-center"
+                className={classNames("fixed bottom-0 right-0 w-40 m-6 p-2 bg-gray-200 hover:bg-gray-500 text-gray-800 font-bold rounded inline-flex items-center", {"animate-bounce": recording === "CLOSED"})}
                 disabled={recording !== "RECORDING" && recording !== "CLOSED"}
                 onClick={onClick}
                 onMouseEnter={() => {recording === "RECORDING" && setButtonText("Stop Recording")}}
@@ -61,11 +56,13 @@ export default function Game() {
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
                     <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
                 </span>)}
-                <span className="ml-2">{buttonText}</span>
+                <span className={classNames({"ml-2": recording === "RECORDING"})}>{buttonText}</span>
             </Button>
-            { debug && (<div className="fixed bottom-0 w-full bg-gray-400 text-white p-4">
-                {showText}
-            </div>)}
+            <div className="fixed bottom-0 left-0 h-8 m-6 p-2 bg-gray-200 hover:bg-gray-500 text-gray-800 rounded inline-flex items-center justify-center" 
+                onMouseEnter={() => setHint(country)}
+                onMouseLeave={() => setHint("Hint")}>
+                {hint}
+            </div>
         </>
     )
 
