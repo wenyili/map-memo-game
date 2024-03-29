@@ -58,7 +58,7 @@ export default function Game() {
                 </span>)}
                 <span className={classNames({"ml-2": recording === "RECORDING"})}>{buttonText}</span>
             </Button>
-            <div className="fixed bottom-0 left-0 h-8 m-6 p-2 bg-gray-200 hover:bg-gray-500 text-gray-800 rounded inline-flex items-center justify-center" 
+            <div className="fixed bottom-0 left-0 h-8 m-6 p-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded inline-flex items-center justify-center" 
                 onMouseEnter={() => setHint(country)}
                 onMouseLeave={() => setHint("Hint")}>
                 {hint}
