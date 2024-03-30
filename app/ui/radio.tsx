@@ -47,4 +47,8 @@ React.ComponentPropsWithoutRef<typeof RadioGroupPrimitives.Indicator>
   />
 ))
 
+RadioGroup.displayName = "RadioGroup"
+RadioGroupItem.displayName = "RadioGroupItem"
+RadioGroupIndicator.displayName = "RadioGroupIndicator"
+
 export { RadioGroup, RadioGroupIndicator, RadioGroupItem }
