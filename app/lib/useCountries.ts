@@ -1,41 +1,5 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import countries from "../assets/country_data.json"
-
-// preload next 3 images
-function* getNextIndex(random:boolean = false): Generator<number>  {
-    const total = countries.length
-    let numArr: number[]
-    if (random) {
-        numArr = [Math.floor(Math.random() * total), Math.floor(Math.random() * total), Math.floor(Math.random() * total)];
-    } else {
-        numArr = [0, 1, 2];
-    }
-
-    if (typeof window !== 'undefined') {
-        for(let i = 0; i < 3; i++) {
-            const nextMap = countries[i]["outline_picture"]
-            const nextIamge = new Image()
-            nextIamge.src = nextMap
-        }
-    }
-
-    while(true) {
-        let newNum: number 
-        if (random) {
-            newNum = Math.floor(Math.random() * total)
-        } else {
-            newNum = numArr[numArr.length - 1] + 1
-        }
-        numArr.push(newNum);
-        if (typeof window !== 'undefined') {
-            const nextMap = countries[newNum]["outline_picture"]
-            const nextIamge = new Image()
-            nextIamge.src = nextMap
-        }
-        yield numArr.shift() || 0;
-    }
-}
-const gen = getNextIndex();
 
 async function judge(question: string, answer:string) {
     try {
@@ -55,15 +19,55 @@ async function judge(question: string, answer:string) {
     }
 }
 
+// preload next 3 images
+function* getNextIndex(random:boolean = false): Generator<number>  {
+    const total = countries.length
+    let numArr: number[]
+    if (random) {
+        numArr = [Math.floor(Math.random() * total), Math.floor(Math.random() * total), Math.floor(Math.random() * total)];
+    } else {
+        numArr = [0, 1, 2];
+    }
+
+    if (typeof window !== 'undefined') {
+        for(let i = 0; i < 3; i++) {
+            const nextIamge = new Image()
+            nextIamge.src = './map/' + countries[i]["name"] + '.webp'
+        }
+    }
+
+    while(true) {
+        let newNum: number 
+        if (random) {
+            newNum = Math.floor(Math.random() * total)
+        } else {
+            newNum = numArr[numArr.length - 1] + 1
+        }
+        numArr.push(newNum);
+
+        if (typeof window !== 'undefined') {
+            const nextIamge = new Image()
+            nextIamge.src = './map/' + countries[newNum]["name"] + '.webp'
+        }
+        yield numArr.shift() || 0;
+    }
+}
+const gen = getNextIndex(true);
+
 export function useCountries() {
     const index = useRef<number | undefined>();
-    if (index.current === undefined) {
-        index.current = gen.next().value
-    }
-    const [country, setCountry] = useState<string>(countries[index.current!]["name_zh"]);
-    const [map, setMap] = useState<string>(countries[index.current!]["outline_picture"]);
-    const [right, setRight] = useState<boolean>(false);
+    const [country, setCountry] = useState<string>();
+    const [map, setMap] = useState<string>();
+    const [right, setRight] = useState<number>(0);
     const [lastText, setLastText] = useState<string>("");
+
+    useEffect(() => {
+        if (index.current === undefined) {
+            index.current = gen.next().value
+            setCountry(countries[index.current!]["name_zh"])
+            setMap('./map/' + countries[index.current!]["name"] + '.webp')
+        }
+    }, [])
     
     const onGuess = async (guess: string) => {
         const country = countries[index.current!]["name_zh"];
@@ -77,16 +81,22 @@ export function useCountries() {
         }
         console.debug(`guess: ${guess} ${country} ${isTrue} ${useGPT}`)
         if (isTrue) {
-            setRight(true)
+            setRight(1)
             index.current = gen.next().value;
+            console.debug('get next:', countries[index.current!]["name"])
             const nextCountry = countries[index.current!]["name_zh"]
-            const nextMap = countries[index.current!]["outline_picture"]
+            const nextMap = './map/' + countries[index.current!]["name"] + '.webp'
 
             setTimeout(() => {
                 setCountry(nextCountry)
                 setMap(nextMap)
-                setRight(false)
                 setLastText("")
+                setRight(0)
+            }, 300);
+        } else {
+            setRight(2)
+            setTimeout(() => {
+                setRight(0)
             }, 300);
         }
     }

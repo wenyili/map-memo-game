@@ -4,8 +4,8 @@ import { Button } from "../ui/button"
 import { useRecorder } from "../lib/useRecorder"
 import { useCountries } from "../lib/useCountries";
 import { Menu } from "./menu";
-import { useEffect, useState } from "react";
-import classNames from 'classnames';
+import { useCallback, useEffect, useRef, useState } from "react";
+import classNames from 'classnames'
 
 const debug = true;
 
@@ -15,6 +15,18 @@ export default function Game() {
     const [ showMenu, setShowMenu ] = useState<boolean>(false)
     const [ buttonText, setButtonText ] = useState<string>("Start Recording")
     const [ hint, setHint ] = useState<string>("Hint")
+    const audioRef = useRef<HTMLAudioElement|null>(null)
+
+    useEffect(() => {
+        if (!audioRef.current) return;
+        if (right === 1) {
+            audioRef.current.src = "correct.mp3"
+            audioRef.current.play()
+        } else if (right === 2) {
+            audioRef.current.src = "wrong.mp3"
+            audioRef.current.play()
+        }
+    }, [right])
 
     const onClick = () => {
         if (recording === "RECORDING") {
@@ -24,22 +36,22 @@ export default function Game() {
         }
     }
 
-    const getButtonText = () => {
+    const getButtonText = useCallback(() => {
         if (recording === "CLOSED") {
             return "Start Recording"   
         } else {
             return recording;
         }
-    }
+    }, [recording])
 
     useEffect(() => {
         setButtonText(getButtonText());
-    }, [recording])
+    }, [getButtonText, recording])
 
     return (
         <>
             <div className="flex items-center justify-center h-screen">
-                <img className="max-w-[80vh] max-h-[80vh]" src={map} alt={country}/>
+                <img className="max-w-[80%] max-h-[80%]" src={map} alt={country}/>
                 <div className="absolute flex items-center justify-center text-yellow-500 text-5xl font-bold">
                     {lastText}
                 </div>
@@ -58,11 +70,14 @@ export default function Game() {
                 </span>)}
                 <span className={classNames({"ml-2": recording === "RECORDING"})}>{buttonText}</span>
             </Button>
-            <div className="fixed bottom-0 left-0 h-8 m-6 p-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded inline-flex items-center justify-center" 
-                onMouseEnter={() => setHint(country)}
-                onMouseLeave={() => setHint("Hint")}>
-                {hint}
+            <div className="flex flex-row items-center justify-center fixed bottom-0 left-0 m-6 gap-2">
+                <div className="h-8 p-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded inline-flex items-center justify-center" 
+                    onMouseEnter={() => setHint(country!)}
+                    onMouseLeave={() => setHint("Hint")}>
+                    {hint}
+                </div>
             </div>
+            <audio ref={audioRef} style={{ display: 'none' }} />
         </>
     )
 
