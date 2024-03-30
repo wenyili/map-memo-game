@@ -56,38 +56,32 @@ module.exports = {
         sm: 'calc(var(--radius) - 4px)'
       },
       keyframes: {
-        'accordion-down': {
-          from: { height: 0 },
-          to: { height: 'var(--radix-accordion-content-height)' }
+        shakeX: {
+          '0%, 100%': { transform: 'translate3d(0, 0, 0)' },
+          '10%, 30%, 50%, 70%, 90%': { transform: 'translate3d(-10px, 0, 0)' },
+          '20%, 40%, 60%, 80%': { transform: 'translate3d(10px, 0, 0)' }
         },
-        'accordion-up': {
-          from: { height: 'var(--radix-accordion-content-height)' },
-          to: { height: 0 }
+        heartBeat: {
+          '0%': { transform: 'scale(1)' },
+          '14%': { transform: 'scale(1.3)' },
+          '28%': { transform: 'scale(1)' },
+          '42%': { transform: 'scale(1.3)' },
+          '70%': { transform: 'scale(1)' },
         },
-        'slide-from-left': {
-          '0%': {
-            transform: 'translateX(-100%)'
-          },
-          '100%': {
-            transform: 'translateX(0)'
-          }
-        },
-        'slide-to-left': {
-          '0%': {
-            transform: 'translateX(0)'
-          },
-          '100%': {
-            transform: 'translateX(-100%)'
-          }
+        wobble: {
+          '0%': { transform: 'translate3d(0, 0, 0)' },
+          '15%': { transform: 'translate3d(-25%, 0, 0) rotate3d(0, 0, 1, -5deg)' },
+          '30%': { transform: 'translate3d(20%, 0, 0) rotate3d(0, 0, 1, 3deg)' },
+          '45%': { transform: 'translate3d(-15%, 0, 0) rotate3d(0, 0, 1, -3deg)' },
+          '60%': { transform: 'translate3d(10%, 0, 0) rotate3d(0, 0, 1, 2deg)' },
+          '75%': { transform: 'translate3d(-5%, 0, 0) rotate3d(0, 0, 1, -1deg)' },
+          '100%': { transform: 'translate3d(0, 0, 0)' },
         }
       },
       animation: {
-        'slide-from-left':
-          'slide-from-left 0.3s cubic-bezier(0.82, 0.085, 0.395, 0.895)',
-        'slide-to-left':
-          'slide-to-left 0.25s cubic-bezier(0.82, 0.085, 0.395, 0.895)',
-        'accordion-down': 'accordion-down 0.2s ease-out',
-        'accordion-up': 'accordion-up 0.2s ease-out'
+        shakeX: 'shakeX 1s ease-in-out',
+        heartBeat: 'heartBeat 1s ease-in-out',
+        wobble: 'wobble 1s ease-in-out',
       }
     }
   },

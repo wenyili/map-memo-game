@@ -10,7 +10,7 @@ import classNames from 'classnames'
 const debug = true;
 
 export default function Game() {
-    const { country, map, onGuess, right, lastText } = useCountries()
+    const { country, map, onGuess, right, lastText, next } = useCountries()
     const { recording, startRecoding, stopRecording, showText } = useRecorder(onGuess);
     const [ showMenu, setShowMenu ] = useState<boolean>(false)
     const [ buttonText, setButtonText ] = useState<string>("Start Recording")
@@ -52,7 +52,10 @@ export default function Game() {
         <>
             <div className="flex items-center justify-center h-screen">
                 <img className="max-w-[80%] max-h-[80%]" src={map} alt={country}/>
-                <div className="absolute flex items-center justify-center text-yellow-500 text-5xl font-bold">
+                <div className={classNames("absolute flex items-center justify-center text-yellow-500 text-5xl md:text-7xl font-bold", {
+                    "animate-heartBeat": right === 1,
+                    "animate-wobble": right === 2,
+                })}>
                     {lastText}
                 </div>
             </div>
@@ -76,6 +79,10 @@ export default function Game() {
                     onMouseLeave={() => setHint("Hint")}>
                     {hint}
                 </div>
+                <Button className="h-8 p-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded inline-flex items-center justify-center"
+                    onClick={() => next()}>
+                    Next
+                </Button>
             </div>
             <audio ref={audioRef} style={{ display: 'none' }} />
         </>

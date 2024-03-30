@@ -68,6 +68,18 @@ export function useCountries() {
             setMap('./map/' + countries[index.current!]["name"] + '.webp')
         }
     }, [])
+
+    const next = () => {
+        index.current = gen.next().value;
+        console.debug('get next:', countries[index.current!]["name"])
+        const nextCountry = countries[index.current!]["name_zh"]
+        const nextMap = './map/' + countries[index.current!]["name"] + '.webp'
+
+        setCountry(nextCountry)
+        setMap(nextMap)
+        setLastText("")
+        setRight(0)
+    }
     
     const onGuess = async (guess: string) => {
         const country = countries[index.current!]["name_zh"];
@@ -83,7 +95,6 @@ export function useCountries() {
         if (isTrue) {
             setRight(1)
             index.current = gen.next().value;
-            console.debug('get next:', countries[index.current!]["name"])
             const nextCountry = countries[index.current!]["name_zh"]
             const nextMap = './map/' + countries[index.current!]["name"] + '.webp'
 
@@ -92,13 +103,14 @@ export function useCountries() {
                 setMap(nextMap)
                 setLastText("")
                 setRight(0)
-            }, 300);
+            }, 1000);
         } else {
             setRight(2)
             setTimeout(() => {
                 setRight(0)
-            }, 300);
+                setLastText("")
+            }, 1000);
         }
     }
-    return {country, map, onGuess, right, lastText}
+    return {country, map, onGuess, right, lastText, next}
 }
