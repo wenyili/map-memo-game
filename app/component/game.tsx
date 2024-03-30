@@ -15,20 +15,21 @@ export default function Game() {
     const [ showMenu, setShowMenu ] = useState<boolean>(false)
     const [ buttonText, setButtonText ] = useState<string>("Start Recording")
     const [ hint, setHint ] = useState<string>("Hint")
-    const audioRef = useRef<HTMLAudioElement|null>(null)
+    const correctAudioRef = useRef<HTMLAudioElement|null>(null)
+    const wrongAudioRef = useRef<HTMLAudioElement|null>(null)
 
     useEffect(() => {
-        if (!audioRef.current) return;
+        if (!correctAudioRef.current || !wrongAudioRef.current) return;
         if (right === 1) {
-            audioRef.current.src = "correct.mp3"
-            audioRef.current.play()
+            correctAudioRef.current.play()
         } else if (right === 2) {
-            audioRef.current.src = "wrong.mp3"
-            audioRef.current.play()
+            wrongAudioRef.current.play()
         }
     }, [right])
 
     const onClick = () => {
+        if (correctAudioRef.current) correctAudioRef.current.src = "correct.mp3"
+        if (wrongAudioRef.current ) wrongAudioRef.current.src = "wrong.mp3"
         if (recording === "RECORDING") {
             stopRecording()
         } else if (recording === "CLOSED") {
@@ -86,7 +87,8 @@ export default function Game() {
                     Next
                 </Button>
             </div>
-            <audio ref={audioRef} style={{ display: 'none' }} />
+            <audio ref={correctAudioRef} style={{ display: 'none' }} />
+            <audio ref={wrongAudioRef} style={{ display: 'none' }} />
         </>
     )
 
