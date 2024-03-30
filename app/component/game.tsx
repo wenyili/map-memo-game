@@ -52,9 +52,11 @@ export default function Game() {
         <>
             <div className="flex items-center justify-center h-screen">
                 <img className="max-w-[80%] max-h-[80%]" src={map} alt={country}/>
-                <div className={classNames("absolute flex items-center justify-center text-yellow-500 text-5xl md:text-7xl font-bold", {
+                <div className={classNames("absolute flex items-center justify-center text-5xl md:text-7xl font-bold tracking-widest", {
                     "animate-heartBeat": right === 1,
                     "animate-wobble": right === 2,
+                    "text-green-600": right === 1,
+                    "text-red-600": right === 2,
                 })}>
                     {lastText}
                 </div>
