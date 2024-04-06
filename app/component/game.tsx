@@ -6,11 +6,21 @@ import { useCountries } from "../lib/useCountries";
 import { Menu } from "./menu";
 import { useCallback, useEffect, useRef, useState } from "react";
 import classNames from 'classnames'
+import { useSearchParams } from "next/navigation";
 
-const debug = true;
+let debug = false;
 
 export default function Game() {
-    const { country, map, onGuess, right, lastText, next } = useCountries()
+    const parmas = useSearchParams()
+    let initialCountry = undefined
+    if (parmas.get("initialCountry")) {
+        initialCountry = parmas.get("initialCountry")!
+    }
+    if (parmas.get("debug")) {
+        debug = true
+    }
+
+    const { country, map, onGuess, right, lastText, lastCountry, next } = useCountries(initialCountry)
     const { recording, startRecoding, stopRecording, showText } = useRecorder(onGuess);
     const [ showMenu, setShowMenu ] = useState<boolean>(false)
     const [ buttonText, setButtonText ] = useState<string>("Start Recording")
@@ -59,11 +69,14 @@ export default function Game() {
                     "text-green-600": right === 1,
                     "text-red-600": right === 2,
                 })}>
-                    {lastText}
+                    {lastCountry}
                 </div>
             </div>
             <Menu isOpen={showMenu} onOpenChange={(isOpen:boolean) => {setShowMenu(isOpen)}}/>
-            <Button 
+            <div className="fixed bottom-16 right-0 w-40 m-6 p-2">
+                <p className="text-gray-400">{lastText}</p>
+            </div>
+            <Button
                 className={classNames("fixed bottom-0 right-0 w-40 m-6 p-2 bg-gray-200 hover:bg-gray-500 text-gray-800 font-bold rounded inline-flex items-center", {"animate-bounce": recording === "CLOSED"})}
                 disabled={recording !== "RECORDING" && recording !== "CLOSED"}
                 onClick={onClick}

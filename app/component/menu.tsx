@@ -40,7 +40,7 @@ export function Menu ({
                 <DialogTitle className="mb-4">Setting</DialogTitle>
                 <fieldset className="flex gap-5 items-center">
                     <label className="text-right w-24 font-bold text-foreground/80" htmlFor="name">
-                        GPT
+                        AI
                     </label>
                     <Switch defaultChecked={useGPT} onCheckedChange={checked => {
                         checked ? localStorage.setItem("useGPT", "true") : localStorage.setItem("useGPT", "false")

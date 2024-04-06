@@ -54,20 +54,35 @@ function* getNextIndex(random:boolean = false): Generator<number>  {
 }
 const gen = getNextIndex(true);
 
-export function useCountries() {
+export function useCountries(initialCountry: string | undefined) {
     const index = useRef<number | undefined>();
     const [country, setCountry] = useState<string>();
     const [map, setMap] = useState<string>();
     const [right, setRight] = useState<number>(0);
     const [lastText, setLastText] = useState<string>("");
+    const [lastCountry, setLastCountry] = useState<string>("");
 
     useEffect(() => {
         if (index.current === undefined) {
-            index.current = gen.next().value
+            // fine the index of initialCountry from countries
+            console.log(initialCountry)
+            if (initialCountry) {
+                for (let i = 0; i < countries.length; i++) {
+                    // 不关心大小写
+                    if (countries[i]["name"].toLowerCase() === initialCountry.toLowerCase()) {
+                        console.log(initialCountry, i)
+                        index.current = i
+                        break
+                    }
+                }
+            }
+            if (index.current === undefined) {
+                index.current = gen.next().value
+            }
             setCountry(countries[index.current!]["name_zh"])
             setMap('./map/' + countries[index.current!]["name"] + '.webp')
         }
-    }, [])
+    }, [initialCountry])
 
     const next = () => {
         index.current = gen.next().value;
@@ -78,22 +93,32 @@ export function useCountries() {
         setCountry(nextCountry)
         setMap(nextMap)
         setLastText("")
+        setLastCountry("")
         setRight(0)
+    }
+
+    const getGuessedCountry = (guess: string) => {
+        // loop countries
+        for (let i = 0; i < countries.length; i++) {
+            if (guess.includes(countries[i]["name_zh"])) {
+                return countries[i]["name_zh"]
+            }
+        }
+        return ""
     }
     
     const onGuess = async (guess: string) => {
         const country = countries[index.current!]["name_zh"];
         setLastText(guess)
         const useGPT = localStorage.getItem("useGPT")
-        let isTrue = false;
-        if (useGPT == "true") {
+        let isTrue = guess.includes(country);
+        if (!isTrue && useGPT == "true") {
             isTrue = await judge(country, guess) || false
-        } else {
-            isTrue = guess.includes(country)
         }
         console.debug(`guess: ${guess} ${country} ${isTrue} ${useGPT}`)
         if (isTrue) {
             setRight(1)
+            setLastCountry(country)
             index.current = gen.next().value;
             const nextCountry = countries[index.current!]["name_zh"]
             const nextMap = './map/' + countries[index.current!]["name"] + '.webp'
@@ -102,15 +127,21 @@ export function useCountries() {
                 setCountry(nextCountry)
                 setMap(nextMap)
                 setLastText("")
+                setLastCountry("")
                 setRight(0)
             }, 1000);
         } else {
-            setRight(2)
-            setTimeout(() => {
-                setRight(0)
-                setLastText("")
-            }, 1000);
+            const guessedCountry = getGuessedCountry(guess)
+            if (guessedCountry) {
+                setRight(2)
+                setLastCountry(guessedCountry)
+                    setTimeout(() => {
+                        setRight(0)
+                        setLastText("")
+                        setLastCountry("")
+                    }, 1000);
+            }
         }
     }
-    return {country, map, onGuess, right, lastText, next}
+    return {country, map, onGuess, right, lastText, lastCountry, next}
 }
