@@ -38,6 +38,14 @@ const messages: ChatCompletionMessageParam[] = [
     {
         'role': 'assistant',
         'content': `正确`
+    },
+    {
+        'role': 'user',
+        'content': `题目："智利", 玩家回答："智力"`
+    },
+    {
+        'role': 'assistant',
+        'content': `正确`
     }
 ]
 
