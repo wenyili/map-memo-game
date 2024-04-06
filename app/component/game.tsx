@@ -6,19 +6,19 @@ import { useCountries } from "../lib/useCountries";
 import { Menu } from "./menu";
 import { useCallback, useEffect, useRef, useState } from "react";
 import classNames from 'classnames'
-import { useSearchParams } from "next/navigation";
+// import { useSearchParams } from "next/navigation";
 
 let debug = false;
 
 export default function Game() {
-    const parmas = useSearchParams()
+    // const parmas = useSearchParams()
     let initialCountry = undefined
-    if (parmas.get("initialCountry")) {
-        initialCountry = parmas.get("initialCountry")!
-    }
-    if (parmas.get("debug")) {
-        debug = true
-    }
+    // if (parmas.get("initialCountry")) {
+    //     initialCountry = parmas.get("initialCountry")!
+    // }
+    // if (parmas.get("debug")) {
+    //     debug = true
+    // }
 
     const { country, map, onGuess, right, lastText, lastCountry, next } = useCountries(initialCountry)
     const { recording, startRecoding, stopRecording, showText } = useRecorder(onGuess);
